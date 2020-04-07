@@ -51,7 +51,8 @@ app.get('/',  async (req, res) => {
   result.forEach(doc => {
     const community = {
       id: doc.id,
-      name: doc.data().name
+      name: doc.data().name,
+      pin: doc.data().pin
     }
     communities.push(community);
   });
