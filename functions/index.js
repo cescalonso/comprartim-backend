@@ -1,5 +1,9 @@
-const counterFunctions = require('./function-groups/counter');
-const communitiesFunctions = require('./function-groups/communities');
+const {counter} = require('./function-groups/counter');
+const {communities} = require('./function-groups/communities');
+const {shopping_requests} = require('./function-groups/shopping-requests');
 
-exports.communities = communitiesFunctions.communities;
-exports.counter = counterFunctions.counter;
+exports.communities = communities;
+exports.counter = counter;
+exports.shopping_requests = shopping_requests;
+
+
