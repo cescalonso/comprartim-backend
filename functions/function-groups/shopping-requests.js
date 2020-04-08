@@ -1,21 +1,22 @@
 const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
-const { db }  = require('../db');
+const community_repository = require('../repositories/community-repository');
+const shopping_requests_repository = require('../repositories/shopping-requests-repository');
 
 const app = express();
 app.use(cors({ origin: true }));
 
 app.post('/', async (req, res) => {
     const {communityId, userId, categoryId, productsList} = req.body;
-    const result = await db.collection('shopping_requests').add({
-        communityId: communityId,
-        userId: userId,
-        categoryId: categoryId,
-        productsList: productsList,
-        status: "pending"
-    });
-    res.json({ id: result.id });
+  
+    if (!await community_repository.exists(communityId)) {
+      return res.status(400).send("Community does not exist");
+    }
+
+    const result = await shopping_requests_repository.create(communityId, userId, categoryId, productsList);
+    
+    return res.json({ id: result.id });
 });
 
 exports.shopping_requests = functions.region('europe-west1').https.onRequest(app);
