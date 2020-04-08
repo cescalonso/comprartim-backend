@@ -1,7 +1,8 @@
 const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
-const community_repository = require('../repositories/community-repository');
+const communityRepository = require('../repositories/community-repository');
+const shoppingRequestRepository = require('../repositories/shopping-requests-repository');
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -9,7 +10,7 @@ app.use(cors({ origin: true }));
 app.post('/', async (req, res) => {
   const community_name = req.body.name;
 
-  let answer = await community_repository.create(community_name).catch(err => {
+  let answer = await communityRepository.create(community_name).catch(err => {
     console.log('Transaction failure:', err);
     return res.status(500).send();
   });
@@ -18,7 +19,7 @@ app.post('/', async (req, res) => {
 });
 
 app.get('/', async (req, res) => {
-  let communities_data = await community_repository.getAll();
+  let communities_data = await communityRepository.getAll();
 
   if (communities_data.empty) {
     return res.json([]);
@@ -38,8 +39,8 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/:id', async (req, res) => {
-  const community_id = req.params.id;
-  const community = await community_repository.get(community_id);
+  const communityId = req.params.id;
+  const community = await communityRepository.get(communityId);
 
   if (!community.exists) {
     return res.status(404).send();
@@ -49,6 +50,28 @@ app.get('/:id', async (req, res) => {
     id: community.id,
     name: community.data().name
   });
+});
+
+app.get('/:id/shopping_requests', async (req, res) => {
+  const communityId = req.params.id;
+
+  if (!await communityRepository.exists(communityId)) {
+    return res.status(400).send('Community does not exist');
+  }
+
+  const shoppingRequestsSnapshot = await shoppingRequestRepository.getFrom(communityId);
+
+  const shoppingRequests = []
+
+  shoppingRequestsSnapshot.forEach(shoppingRequestSnapshot => {
+    let shoppingRequest = {
+      id: shoppingRequestSnapshot.id
+    };
+    Object.assign(shoppingRequest, shoppingRequestSnapshot.data());
+    shoppingRequests.push(shoppingRequest);
+  });
+
+  return res.json(shoppingRequests);
 });
 
 exports.communities = functions.region('europe-west1').https.onRequest(app);

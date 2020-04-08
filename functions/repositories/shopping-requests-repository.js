@@ -10,3 +10,7 @@ exports.create = async (communityId, userId, categoryId, productsList) => {
         status: "pending"
     });
 }
+
+exports.getFrom = async (communityId) => {
+    return await db.collection('shopping_requests').where('communityId', '==', communityId).get();
+}
