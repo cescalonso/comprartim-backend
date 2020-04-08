@@ -13,17 +13,12 @@ app.post('/', async (req, res) => {
       const name = req.body.name;
       let transaction = db.runTransaction(t => {
         return t.get(db.collection('communities_counter'))
-          .then(doc => {
-            
+          .then(countersSnapshot => {
             let nextValue;
-
-            doc.forEach(counter => {
+            countersSnapshot.forEach(counter => {
               nextValue = counter.data().value + 1;
-              
               t.update(counter.ref, {value: nextValue});
             });
-
-            console.log(nextValue);
 
             const communityReference = db.collection('communities').doc();
             t.create(communityReference, {name: name, pin: nextValue});
