@@ -20,8 +20,8 @@ app.post('/', async (req, res) => {
               t.update(counter.ref, {value: nextValue});
             });
 
-            const communityReference = db.collection('communities').doc();
-            t.create(communityReference, {name: name, pin: nextValue});
+            const communityReference = db.collection('communities').doc(`${nextValue}`);
+            t.create(communityReference, {name: name});
             return communityReference;
           });
       }).then(result => {
@@ -46,8 +46,7 @@ app.get('/',  async (req, res) => {
   result.forEach(doc => {
     const community = {
       id: doc.id,
-      name: doc.data().name,
-      pin: doc.data().pin
+      name: doc.data().name
     }
     communities.push(community);
   });
