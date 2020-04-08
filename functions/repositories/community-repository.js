@@ -19,13 +19,11 @@ exports.getAll = async () => {
 
 exports.create = async (community_name) => {
     return await db.runTransaction(t => {
-      return t.get(db.collection('communities_counter'))
+      return t.get(db.collection('communities_counter').doc('communities_counter_id'))
         .then(countersSnapshot => {
-          let nextValue;
-          countersSnapshot.forEach(counter => {
-            nextValue = counter.data().value + 1;
-            t.update(counter.ref, { value: nextValue });
-          });
+          const nextValue = countersSnapshot.data().value + 1;
+          t.update(countersSnapshot.ref, { value: nextValue });
+          
           const communityReference = db.collection('communities').doc(`${nextValue}`);
           t.create(communityReference, { name: community_name });
           return communityReference;
