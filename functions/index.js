@@ -10,31 +10,31 @@ app.use(cors({ origin: true }));
 
 const db = admin.firestore();
 app.post('/', async (req, res) => {
-      const name = req.body.name;
-      let transaction = db.runTransaction(t => {
-        return t.get(db.collection('communities_counter'))
-          .then(countersSnapshot => {
-            let nextValue;
-            countersSnapshot.forEach(counter => {
-              nextValue = counter.data().value + 1;
-              t.update(counter.ref, {value: nextValue});
-            });
+  const name = req.body.name;
+  let transaction = db.runTransaction(t => {
+    return t.get(db.collection('communities_counter'))
+      .then(countersSnapshot => {
+        let nextValue;
+        countersSnapshot.forEach(counter => {
+          nextValue = counter.data().value + 1;
+          t.update(counter.ref, { value: nextValue });
+        });
 
-            const communityReference = db.collection('communities').doc(`${nextValue}`);
-            t.create(communityReference, {name: name});
-            return communityReference;
-          });
-      }).then(result => {
-        console.log('Transaction success!');
-        return res.json({ id: result.id});
-      }).catch(err => {
-        console.log('Transaction failure:', err);
-        return res.status(500).send();
+        const communityReference = db.collection('communities').doc(`${nextValue}`);
+        t.create(communityReference, { name: name });
+        return communityReference;
       });
+  }).then(result => {
+    console.log('Transaction success!');
+    return res.json({ id: result.id });
+  }).catch(err => {
+    console.log('Transaction failure:', err);
+    return res.status(500).send();
+  });
 });
 
-app.get('/',  async (req, res) => {
-  let result =  await admin.firestore().collection('communities').get();
+app.get('/', async (req, res) => {
+  let result = await admin.firestore().collection('communities').get();
 
   if (result.empty) {
     res.json([]);
@@ -54,10 +54,24 @@ app.get('/',  async (req, res) => {
   res.json(communities);
 });
 
+app.get('/:id', async (req, res) => {
+  let communityReference = db.collection('communities').doc(req.params.id);
+  let community = await communityReference.get();
+
+  if (!community.exists) {
+    res.status(404).send();
+    return;
+  }
+  res.json({
+    id: community.id,
+    name: community.data().name
+  });
+});
+
 
 exports.communities = functions.region('europe-west1').https.onRequest(app);
 
 exports.counter = functions.region('europe-west1').https.onRequest(async (req, res) => {
-  const writeResult = await admin.firestore().collection('communities_counter').add({value: 0});
-  res.json({result: `Message with ID: ${writeResult.id} added.`});
+  const writeResult = await admin.firestore().collection('communities_counter').add({ value: 0 });
+  res.json({ result: `Message with ID: ${writeResult.id} added.` });
 });
