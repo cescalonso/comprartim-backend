@@ -22,6 +22,22 @@ exports.isPending = async (shoppingRequestId) => {
     return shoppingRequest.exists && shoppingRequest.data().status === "pending";
 }
 
+exports.isOwnedBy = async (shoppingRequestId, ownerId) => {
+    let shoppingRequest = await shoppingRequestCollection.doc(shoppingRequestId).get();
+
+    return shoppingRequest.exists && shoppingRequest.data().ownerId === ownerId;
+}
+
+exports.isAccepted = async (shoppingRequestId) => {
+    let shoppingRequest = await shoppingRequestCollection.doc(shoppingRequestId).get();
+
+    return shoppingRequest.exists && shoppingRequest.data().status === "accepted";
+}
+
 exports.accept = async (shoppingRequestId, buyerId) => {
     return await shoppingRequestCollection.doc(shoppingRequestId).update({buyerId: buyerId, status: "accepted"})
+}
+
+exports.close = async (shoppingRequestId) => {
+    return await shoppingRequestCollection.doc(shoppingRequestId).update({status: "closed"})
 }

@@ -35,4 +35,24 @@ app.put('/:id/accept', async (req, res) => {
   return res.status(200).send();
 });
 
+app.put('/:id/close', async (req, res) => {
+  const {ownerId} = req.body;
+  const shoppingRequestId = req.params.id;
+
+  if (!await shoppingRequestsRepository.isOwnedBy(shoppingRequestId, ownerId)){
+    return res.status(400).send(`Shopping request does not exist or does not belong to ${ownerId}`);
+  }
+
+  if (!await shoppingRequestsRepository.isAccepted(shoppingRequestId)){
+    return res.status(400).send("Shopping request is not accepted");
+  }
+
+  await shoppingRequestsRepository.close(shoppingRequestId).catch(err => {
+    console.log(`Error closing the shopping request ${shoppingRequestId}`, err);
+    return res.status(500).send();
+  });
+
+  return res.status(200).send();
+});
+
 exports.shopping_requests = functions.region('europe-west1').https.onRequest(app);
