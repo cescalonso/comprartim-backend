@@ -15,6 +15,7 @@ app.post('/', async (req, res) => {
     return res.status(500).send();
   });
 
+  res.set('Access-Control-Allow-Origin', '*');
   return res.json({id: answer.id});
 });
 

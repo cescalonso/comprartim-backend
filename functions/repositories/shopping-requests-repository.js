@@ -1,4 +1,4 @@
-const { db }  = require('../db');
+const { db, dbFieldValue }  = require('../db');
 const shoppingRequestCollection = db.collection('shopping_requests');
 
 
@@ -8,12 +8,13 @@ exports.create = async (communityId, ownerId, categoryId, productsList) => {
         ownerId: ownerId,
         categoryId: categoryId,
         productsList: productsList,
-        status: "pending"
+        status: "pending",
+        createdAt: dbFieldValue.serverTimestamp()
     });
 }
 
 exports.getFrom = async (communityId) => {
-    return await shoppingRequestCollection.where('communityId', '==', communityId).get();
+    return await shoppingRequestCollection.where('communityId', '==', communityId).orderBy("createdAt", "desc").get();
 }
 
 exports.isPending = async (shoppingRequestId) => {
