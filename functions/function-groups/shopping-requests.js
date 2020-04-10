@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors')({origin: true});
 const communityRepository = require('../repositories/community-repository');
 const shoppingRequestsRepository = require('../repositories/shopping-requests-repository');
+const chatRepository = require('../repositories/chat-repository');
 
 const app = express();
 app.use(cors);
@@ -27,12 +28,14 @@ app.put('/:id/accept', async (req, res) => {
     return res.status(400).send("Shopping request does not exist or is not pending");
   }
 
-  await shoppingRequestsRepository.accept(shoppingRequestId, buyerId).catch(err => {
+  const chatId = await chatRepository.create(shoppingRequestId, buyerId);
+
+  await shoppingRequestsRepository.accept(shoppingRequestId, buyerId, chatId).catch(err => {
     console.log(`Error accepting the shopping request ${shoppingRequestId}`, err);
     return res.status(500).send();
   });
 
-  return res.status(200).send();
+  return res.status(200).json({chatId: chatId});
 });
 
 app.put('/:id/close', async (req, res) => {

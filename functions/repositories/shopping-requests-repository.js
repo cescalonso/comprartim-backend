@@ -35,8 +35,8 @@ exports.isAccepted = async (shoppingRequestId) => {
     return shoppingRequest.exists && shoppingRequest.data().status === "accepted";
 }
 
-exports.accept = async (shoppingRequestId, buyerId) => {
-    return await shoppingRequestCollection.doc(shoppingRequestId).update({buyerId: buyerId, status: "accepted"})
+exports.accept = async (shoppingRequestId, buyerId, chatId) => {
+    return await shoppingRequestCollection.doc(shoppingRequestId).update({buyerId: buyerId, status: "accepted", chatId: chatId})
 }
 
 exports.close = async (shoppingRequestId) => {
