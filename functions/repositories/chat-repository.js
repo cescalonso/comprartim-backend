@@ -19,13 +19,12 @@ exports.create = async (shoppingRequestId, buyerId) => {
         isOpen: true
     })
 
-    await members.forEach(member => { addToMemberConversations(member.userId, chatRoomRef.id); });
-
+    await members.forEach(member => { addMemberstoChat(member, chatRoomRef.id); });
 
     return chatRoomRef.id;
 }
 
-async function addToMemberConversations(memberId, chatId) {
+async function addMemberstoChat(memberId, chatId) {
     const chatRef = usersChatCollection.doc(memberId);
 
     await chatRef.set({ [chatId]: chatId }).catch((err) => {
